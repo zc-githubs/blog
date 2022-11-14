@@ -1,0 +1,13 @@
+{
+  "editor:toggle-code": [],
+  "workspace:goto-tab-2": [
+    {
+      "modifiers": [
+        "Alt",
+        "Mod",
+        "Shift"
+      ],
+      "key": "2"
+    }
+  ]
+}
