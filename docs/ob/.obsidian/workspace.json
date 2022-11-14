@@ -1,0 +1,137 @@
+{
+  "main": {
+    "id": "e59ffd7199fa4b67",
+    "type": "split",
+    "children": [
+      {
+        "id": "7ace17ef80dfaa9d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f62a4e3b45d5bf96",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e586831284dd0e94",
+    "type": "split",
+    "children": [
+      {
+        "id": "2d11d069639714e0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "469d1766d0b25339",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "ec59e3cf7300760b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "d7fda8020381f980",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "b39bea9246da6a3c",
+    "type": "split",
+    "children": [
+      {
+        "id": "a702f68c693cb218",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0360dae2d162e7ce",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "51b9349e23b76385",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "fda90aec455ea5f4",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "4c798910cdfbc58e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "469d1766d0b25339",
+  "lastOpenFiles": [
+    "000-Inbox/tmp/代码审计/java代码审计基础/Java代码审计之fastjson反序列化.md",
+    "000-Inbox/tmp/代码审计/java代码审计基础/JAVA代码审计之java反序列化.md",
+    "000-Inbox/tmp/代码审计/java代码审计基础/Java代码审计之文件上传.md"
+  ]
+}
